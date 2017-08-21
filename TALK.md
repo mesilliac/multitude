@@ -487,17 +487,20 @@ When a websocket is closed,
 these will be assigned to `self.close_code` and `self.close_reason`.
 If not given, these will be `None`.
 
-        print("close code: {}".format(self.close_code), end=", ")
+        print("close code: {}".format(self.close_code))
         print("close reason: {!r}".format(self.close_reason))
 
-To test this, let's add some code to `server.onmessage` in our client
+A list of these short codes and their meanings can be found at
+https://tools.ietf.org/html/rfc6455#section-7.4.1
+
+To test the closing, let's add some code to `server.onmessage` in our client
 to close the connection after it receives a message.
 
 In `client/index.js`:
 
     server.onmessage = function(message) {
         alert(message.data);
-        server.close();
+        server.close(1000, "message received");
     };
 
 ### verify that it works ###
@@ -511,8 +514,8 @@ After the alert message is dismissed,
 the server should print some info, such as
 
     WebSocket closed by user at 127.0.0.1
-    close code: None, close reason: None
-
+    close code: 1000
+    close reason: u'message received'
 
 Step 5: JSON messages
 =====================

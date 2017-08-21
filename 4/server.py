@@ -53,7 +53,7 @@ class ClientSocket(tornado.websocket.WebSocketHandler):
         # print some info about the closed connection
         print("WebSocket closed",
               "by user at {}".format(self.request.remote_ip))
-        print("close code: {}".format(self.close_code), end=", ")
+        print("close code: {}".format(self.close_code))
         print("close reason: {!r}".format(self.close_reason))
 
 if __name__ == "__main__":

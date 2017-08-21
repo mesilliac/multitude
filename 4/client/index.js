@@ -10,6 +10,6 @@ server.onopen = function() {
 // code to run when we recieve a message from the server
 server.onmessage = function(message) {
     alert(message.data);
-    server.close();
+    server.close(1000, "message received");
 };
 
