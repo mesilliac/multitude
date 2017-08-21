@@ -339,11 +339,8 @@ which will be called when a websocket connection is initiated.
     class ClientSocket(tornado.websocket.WebSocketHandler):
         def open(self):
             # print some info about the opened connection
-            localename = self.get_browser_locale().name
-            ipaddr = self.request.remote_ip
             print("WebSocket opened",
-                  "from user at {}".format(ipaddr),
-                  "with locale {!r}".format(localename))
+                  "from user at {}".format(self.request.remote_ip))
 
 We add this connection interface to our `tornado.web.Application`
 in a similar way to the `tornado.web.StaticFileHandler`.
@@ -394,7 +391,7 @@ It should open a websocket connection with the server,
 which should print a message to the console.
 Something like
 
-    WebSocket opened from user at 127.0.0.1 with locale u'English (US)'
+    WebSocket opened from user at 127.0.0.1
 
 Success! A connection!
 
@@ -479,11 +476,8 @@ Let's print out some connection info when a socket is closed.
         """Called when a client connection is closed for any reason."""
         
         # print some info about the closed connection
-        localename = self.get_browser_locale().name
-        ipaddr = self.request.remote_ip
         print("WebSocket closed",
-              "by user at {}".format(ipaddr),
-              "with locale {!r}".format(localename))
+              "by user at {}".format(self.request.remote_ip))
 
 In addition to the basic information,
 websockets can optionally specify a reason for closing.
@@ -516,7 +510,7 @@ verify in the console that the server hasn't closed the connection.
 After the alert message is dismissed,
 the server should print some info, such as
 
-    WebSocket closed by user at 127.0.0.1 with locale u'English (US)'
+    WebSocket closed by user at 127.0.0.1
     close code: None, close reason: None
 
 

@@ -35,11 +35,8 @@ class ClientSocket(tornado.websocket.WebSocketHandler):
         """Called when a websocket connection is initiated."""
         
         # print some info about the opened connection
-        localename = self.get_browser_locale().name
-        ipaddr = self.request.remote_ip
         print("WebSocket opened",
-              "from user at {}".format(ipaddr),
-              "with locale {!r}".format(localename))
+              "from user at {}".format(self.request.remote_ip))
     
     def on_message(self, message):
         """Called when a websocket client sends a message."""
@@ -54,11 +51,8 @@ class ClientSocket(tornado.websocket.WebSocketHandler):
         """Called when a client connection is closed for any reason."""
         
         # print some info about the closed connection
-        localename = self.get_browser_locale().name
-        ipaddr = self.request.remote_ip
         print("WebSocket closed",
-              "by user at {}".format(ipaddr),
-              "with locale {!r}".format(localename))
+              "by user at {}".format(self.request.remote_ip))
         print("close code: {}".format(self.close_code), end=", ")
         print("close reason: {!r}".format(self.close_reason))
 

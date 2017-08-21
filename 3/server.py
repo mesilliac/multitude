@@ -35,11 +35,8 @@ class ClientSocket(tornado.websocket.WebSocketHandler):
         """Called when a websocket connection is initiated."""
         
         # print some info about the opened connection
-        localename = self.get_browser_locale().name
-        ipaddr = self.request.remote_ip
         print("WebSocket opened",
-              "from user at {}".format(ipaddr),
-              "with locale {!r}".format(localename))
+              "from user at {}".format(self.request.remote_ip))
     
     def on_message(self, message):
         """Called when a websocket client sends a message."""
