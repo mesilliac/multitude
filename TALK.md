@@ -11,7 +11,7 @@ and that we can set up a webserver and connect to it.
 
 Find a nice location and clone the repository there
 
-    git clone https://github.com/mesilliac/multitude
+    git clone https://github.com/mesilliac/multitude.git
 
 (b) create a server.py
 ----------------------
@@ -133,14 +133,10 @@ so lets create a bare bones HTML file to test that it works.
 Save the following as `client/index.html`.
 
     <!DOCTYPE html>
-    <html><head>
-        <meta charset="utf-8"/>
-        <title>My Awesome Webapp</title>
-    </head><body>
+    <meta charset="utf-8"/>
+    <title>My Awesome Webapp</title>
     
     Hello, World!
-    
-    </body></html>
 
 
 (d) test that it all works
@@ -240,7 +236,7 @@ in which several people can interact together using our webapp.
 
 Surely it will be fun!
 
-The web design team tweaks our client/index.html "Hello, World",
+The web design team tweaks our `client/index.html` "Hello, World",
 
     <div id="origin">
         <div id="viewport"></div>
@@ -249,9 +245,11 @@ The web design team tweaks our client/index.html "Hello, World",
         </div>
     </div>
 
-adds a stylesheet link to the `<head>` section:
+adds a stylesheet link to the header:
 
-        <link rel="stylesheet" href="index.css">
+    <meta charset="utf-8"/>
+    <title>My Awesome Webapp</title>
+    <link rel="stylesheet" href="index.css">
 
 and gives us a new CSS file to serve as `/index.css`:
 
@@ -371,9 +369,12 @@ This should be all we need to do to add basic websocket support to our server.
 
 Websocket usage in javascript is even easier.
 
-To our `client/index.html`, we can add a script element to the `<head>`:
+To our `client/index.html`, we can add a script element to the header:
 
-        <script src="index.js"></script>
+    <meta charset="utf-8"/>
+    <title>My Awesome Webapp</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="index.js"></script>
 
 Then we add a new file for our script, `client/index.js`,
 containing just one line:
@@ -441,12 +442,12 @@ Add the following to our `client/index.js`:
 
     // code to run when our websocket connects
     server.onopen = function() {
-      server.send("Hello, server!");
+        server.send("Hello, server!");
     };
 
     // code to run when we receive a message from the server
     server.onmessage = function(message) {
-      alert(message.data);
+        alert(message.data);
     };
 
 Now when the client opens the websocket connection,
@@ -501,8 +502,8 @@ to close the connection after it receives a message.
 In `client/index.js`:
 
     server.onmessage = function(message) {
-      alert(message.data);
-      server.close();
+        alert(message.data);
+        server.close();
     };
 
 ### verify that it works ###
@@ -521,5 +522,91 @@ the server should print some info, such as
 
 Step 5: JSON messages
 =====================
+
+Now that we have a communication channel,
+we're ready to start sending useful messages between the client and server.
+
+A nice simple format that works well in both Python and Javascript, is JSON.
+It has the added benefit that it's human-readable,
+which makes debugging easier.
+Websockets can also send binary data, in both stream and blob form,
+but for now we'll stick to text-only.
+Unless you know it's really going to be a bobttleneck,
+sticking with human-readable data formats is a big plus for development.
+
+First lets convert what we already have to use JSON.
+
+### server ###
+
+Python has several nice json modules,
+but for now we can just add the built-in `json` to our imports:
+
+    import json
+
+In our message response, replace
+
+        self.write_message("Hello, client!")
+
+with
+
+        response = {"popup" : "Hello, client!"}
+        m = json.dumps(response)
+        self.write_message(m)
+
+`json.dumps` can take a a python string, number, dictionary or array,
+and will output a string representation of them in JSON form.
+This string will almost always look like native Python, which is great.
+
+If we refresh our client webpage now,
+we can see the exact JSON message sent by our server,
+which should look something like:
+
+    {"popup": "Hello, client!"}
+
+That's not the intention, though.
+the benefit of using JSON is that we can parse it on the client,
+and perform different actions depending on the message.
+
+### client ###
+
+In this case lets modify our `client/index.js`
+so that it makes a popup window with the text of "popup" from the message.
+
+    server.onmessage = function(message) {
+        var m = JSON.parse(message.data);
+        if (m.popup) {
+            alert(m.popup);
+        }
+    };
+
+Now when we refresh, we should see what we originally had,
+A popup window with
+
+    Hello, client!
+
+On the javascript side, it's useful to be able to debug the actual messages,
+so we can also log them to the javascript console using `console.log()`.
+
+    server.onmessage = function(message) {
+        console.log(message);
+        var m = JSON.parse(message.data);
+        if (m.popup) {
+            alert(m.popup);
+        }
+    };
+
+This console can be opened in Firefox with CTRL-SHIFT-K,
+and in Chrome with CTRL-SHIFT-J.
+
+While we're at it, lets also update our javascript to send using JSON.
+
+    server.onopen = function() {
+        message = JSON.stringify({"message": "Hello, server!"});
+        server.send(message);
+    };
+
+Now our server should show the new JSON-format messages
+
+    client sent: u'{"message":"Hello, server!"}'
 
 
