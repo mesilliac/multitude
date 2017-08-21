@@ -607,3 +607,142 @@ Now our server should show the new JSON-format messages
     client sent: u'{"message":"Hello, server!"}'
 
 
+Step 6: Doing something with messages
+=====================================
+
+Now that we have a framework for passing messages back and forth
+between our client and server,
+we can start actually creating our awesome app!
+
+While the design team is coming up with something better than popups,
+we can think about what we actually want our app to do.
+
+For this example, we'll try to combine two things.
+One is sending small single-sentence messages,
+and the other is a shared sketchpad where clients can draw simultaneously.
+
+For the messages,
+our clients should be able to send messages to each other,
+and these messages should appear immediately to all clients.
+
+For the sketchpad,
+clients should be able to draw in a common area,
+and see each others' sketches appear in real-time as they draw.
+
+### message format ###
+
+For these two requirements,
+our messages already mostly support the first.
+We can send messages with a format such as:
+
+    {"client": "mary", "message": "mary's message to everyone"}
+
+For the second, we'll need to specify several things about what is being drawn.
+We can have something like:
+
+    {"client": "mary", "action": "draw", "from": (x, y), "to": (x, y)}
+
+Later if we want, we can add more actions (such as "erase"),
+and more types of information.
+But for now this should be enough for us to start,
+so the message format looks okay.
+
+### basic client messages ###
+
+In any case the design team has gotten back to us,
+and they say we can just put the message in the middle of the screen in stead.
+They also added a text input box at the bottom of the screen.
+They must have known what we were thinking!
+Now the body of our `index.html` looks like this:
+
+    <div id="origin">
+        <div id="viewport"></div>
+        <div id="textbox"></div>
+        <form onsubmit="submit_message();">
+            <input type="text" id="typebox" placeholder="type here">
+        </form>
+    </div>
+
+our `index.css` has another item at the end:
+
+    #typebox {
+        position: absolute;
+        bottom: -49vmin;
+        left: -40vmin;
+        width: 80vmin;
+        text-align: center;
+    }
+
+our `index.js` has an extra function:
+
+    function submit_message() {
+        var typebox = document.getElementById('typebox');
+        var message = JSON.stringify({"message": typebox.value});
+        server.send(message);
+        typebox.value = "";
+    }
+
+and there's another `else if` in `server.onmessage`:
+
+        if (m.popup) {
+            alert(m.popup);
+        } else if (m.message) {
+            document.getElementById('textbox').innerHTML = m.message;
+        }
+
+How mysterious.
+
+### basic echo server ###
+
+Let's deal with this new and wonderful message on our server,
+by echoing it back to the client.
+
+First in our `on_message()` method,
+we'll have to parse the JSON to get the message.
+We can add it just after the debug line printing the message to the console.
+
+        # print the message to the console
+        print("client sent: {!r}".format(message))
+        
+        # try to parse the message
+        try:
+            parsed_message = json.loads(message)
+        except ValueError:
+            print("Failed to parse message: {!r}".format(message))
+            return
+
+Here if we fail to parse the message we just return,
+but we could equally close the connection with an error code such as 1003.
+
+Assuming we parsed the message successfully,
+we can change our response to echo back to the client.
+
+        # if there's a "message" in the message, echo it
+        if "message" in parsed_message:
+            response = {
+                "client" : str(self.request.remote_ip),
+                "message" : parsed_message["message"]
+            }
+            # respond to the message
+            m = json.dumps(response)
+            self.write_message(m)
+        else:
+            print("message unhandled.")
+
+This is very similar to the code we already had,
+except for the client name we use the IP address of the client,
+and for the message we echo the message they sent.
+For debugging purposes,
+we print a message to the console if the client's message was not handled.
+
+### test it ###
+
+The first thing we should notice when we refresh our client page,
+is that it now says "Hello, server!".
+That's the message from the client!
+Looks like it works :).
+
+Verify that typing messages in the box echoes them back,
+and that they're displayed correctly in the middle of the viewport.
+
+
