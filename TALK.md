@@ -129,7 +129,7 @@ serving static content from the "client" subdirectory.
 ------------------------------
 
 Of course, we don't yet have anything to serve,
-so lets create a bare bones HTML file to test that it works.
+so let's create a bare bones HTML file to test that it works.
 Save the following as `client/index.html`.
 
     <!DOCTYPE html>
@@ -251,7 +251,7 @@ adds a stylesheet link to the header:
     <title>My Awesome Webapp</title>
     <link rel="stylesheet" href="index.css">
 
-and gives us a new CSS file to serve as `/index.css`:
+and gives us a new CSS file to serve as `index.css`.
 
     body {
         overflow: hidden;
@@ -432,7 +432,7 @@ we can automatically respond every time we receive a message.
 
 ### client message handling ###
 
-On the client side, message handling is almsot identical,
+On the client side, message handling is almost identical,
 although in Javascript in stead of Python.
 
 Add the following to our `client/index.js`:
@@ -465,7 +465,7 @@ Step 4: Closing sockets
 =======================
 
 
-After oening sockets and sending and receiving messages,
+After opening sockets and sending and receiving messages,
 The last basic thing to handle is closing the sockets.
 
 A socket can be closed by calling the `close` method,
@@ -525,10 +525,10 @@ It has the added benefit that it's human-readable,
 which makes debugging easier.
 Websockets can also send binary data, in both stream and blob form,
 but for now we'll stick to text-only.
-Unless you know it's really going to be a bobttleneck,
+Unless you know it's really going to be a bottleneck,
 sticking with human-readable data formats is a big plus for development.
 
-First lets convert what we already have to use JSON.
+First let's convert what we already have to use JSON.
 
 ### server ###
 
@@ -563,7 +563,7 @@ and perform different actions depending on the message.
 
 ### client ###
 
-In this case lets modify our `client/index.js`
+In this case let's modify our `client/index.js`
 so that it makes a popup window with the text of "popup" from the message.
 
     server.onmessage = function(message) {
@@ -574,7 +574,7 @@ so that it makes a popup window with the text of "popup" from the message.
     };
 
 Now when we refresh, we should see what we originally had,
-A popup window with
+a popup window with
 
     Hello, client!
 
@@ -592,7 +592,7 @@ so we can also log them to the javascript console using `console.log()`.
 This console can be opened in Firefox with CTRL-SHIFT-K,
 and in Chrome with CTRL-SHIFT-J.
 
-While we're at it, lets also update our javascript to send using JSON.
+While we're at it, let's also update our javascript to send using JSON.
 
     server.onopen = function() {
         message = JSON.stringify({"message": "Hello, server!"});
