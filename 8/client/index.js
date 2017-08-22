@@ -82,7 +82,6 @@ function onMouseMove(event) {
 
 function onMouseDown(event) {
     dragging = true;
-    console.log(event.bubbles);
     var viewport = event.currentTarget;
     var bounds = viewport.getBoundingClientRect()
     lastpos = [(event.clientX - bounds.left) / viewport.clientWidth,
