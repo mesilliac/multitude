@@ -802,7 +802,7 @@ from another computer on the local network.
 The message should be echoed to every connected client,
 and the server should display the number of messages it sent.
 
-### improving the client ###
+### adding colour, names, and multiple message display ###
 
 It's not very pretty, though.
 And it still doesn't say who sent what message,
@@ -860,7 +860,23 @@ and modify our `index.js` again to use the colour.
         text = '<span style="color:' + m.color + '">' + text + "</span>"
         document.getElementById('textbox').innerHTML += "<br>" + text;
 
-While we were doing this, our design team updated our `index.css`,
+### misc client improvements ###
+
+As we're fousing on the Python side
+we can ignore all the miscellaneous improvements that go into the client UI.
+This separation of logic and UI leads to an efficient distribution of labour,
+with server team and client team both able to work in parallel.
+It also means that if you don't know javascript,
+or your web designer friend doesn't know Python,
+you can productively work together as a duo to create something great.
+
+Of course, if you like both Python and web design
+then you can work on both sides at once.
+But even then it's nice to be able to cleanly distribute the work later,
+when your idea turns out to be wildly successful and workload increases.
+
+Here we can assume that while we were adding the random color functionality,
+our design team updated our `index.css`,
 rewriting `#textbox` and `#typebox`, and adding a new `#textarea` tag:
 
     #textarea{
@@ -882,7 +898,7 @@ rewriting `#textbox` and `#typebox`, and adding a new `#textarea` tag:
         text-align: center;
     }
 
-This goes with an update to `index.html`, which now looks like:
+which goes with an update to `index.html`, which now looks like:
 
     <div id="origin">
         <div id="viewport"></div>
@@ -897,7 +913,7 @@ This goes with an update to `index.html`, which now looks like:
 
 ### set your name ###
 
-This should work pretty well, but there's one last thing to do:
+This should work pretty well as is, but there's one last thing to do:
 allow clients to set their name.
 
 There are various ways this could be done,
