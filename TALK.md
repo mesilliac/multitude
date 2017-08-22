@@ -746,3 +746,191 @@ Verify that typing messages in the box echoes them back,
 and that they're displayed correctly in the middle of the viewport.
 
 
+Step 7: Multi-user Communication
+================================
+
+In fact, as it is,
+our server should already accept connections from multiple users.
+It's just that the connections only echo back to themselves.
+
+Perhaps we can enhance this easily by keeping a list of connections,
+and echoing to all of them?
+Let's try.
+
+### messaging multiple users ###
+
+At the top of our `server.py`,
+add something to keep track of our connections.
+In this case it is a set, but really it could be pretty much anything.
+
+    # keep track of connected clients
+    client_connections = set()
+
+Now when a connection is opened it should be added to this set,
+which we can do neatly in our `ClientSocket.open()` method.
+
+        # add this connection to the set of active connections
+        client_connections.add(self)
+
+Similary when the connection closes,
+it should be removed in `ClientSocket.on_close()`:
+
+        # remove this connection from the set of active connections
+        client_connections.remove(self)
+
+Now when we echo a message back to a client,
+in stead of just sending the message to them
+let's send it to everyone.
+
+Replace
+
+            self.write_message(m)
+
+with
+
+            for connection in client_connections:
+                connection.write_message(m)
+            print("messaged {} clients".format(len(client_connections)))
+
+### test it ###
+
+We can test this on our own machines by opening two web browsers.
+
+We should also be able to test it by connecting to our machine
+from another computer on the local network.
+
+The message should be echoed to every connected client,
+and the server should display the number of messages it sent.
+
+### improving the client ###
+
+It's not very pretty, though.
+And it still doesn't say who sent what message,
+or keep more than one message on the screen at once.
+
+As we're already sending a client id,
+the second of these is easily fixed by prefixing the message with the sender.
+
+In `index.js` we can replace
+
+        document.getElementById('textbox').innerHTML = m.message;
+
+with
+
+        var text = m.client + ": " + m.message
+        document.getElementById('textbox').innerHTML = text;
+
+In fact we can go ahead and display more than one message this way as well,
+by appending a line-break and the new text,
+in stead of replacing it outright.
+
+        var text = m.client + ": " + m.message
+        document.getElementById('textbox').innerHTML += "<br>" + text;
+
+Now there's only prettiness...
+well, let's add some colour.
+
+We can assign a random colour to each client,
+and display their messages using that colour.
+Let's assign it in the server,
+and send it with the message.
+
+In `server.py`, import random
+
+    import random
+
+add some colour spice to `ClientSocket.open()`
+
+        # assign a random not-too-light colour
+        self.color = '#'
+        for i in range(3):
+            self.color += hex(random.randint(0,13))[2:]
+
+modify our `ClientSocket.on_message()` response to include it
+
+            response = {
+                "client" : str(self.request.remote_ip),
+                "color" : self.color,
+                "message" : parsed_message["message"]
+            }
+
+and modify our `index.js` again to use the colour.
+
+        var text = m.client + ": " + m.message
+        text = '<span style="color:' + m.color + '">' + text + "</span>"
+        document.getElementById('textbox').innerHTML += "<br>" + text;
+
+While we were doing this, our design team updated our `index.css`,
+rewriting `#textbox` and `#typebox`, and adding a new `#textarea` tag:
+
+    #textarea{
+        position: absolute;
+        width: 100vmin;
+        bottom: -49vmin;
+        left: -50vmin;
+    }
+    #textbox {
+        width: 100%;
+        margin-bottom: 0.3em;
+        text-align: center;
+        padding-top: auto;
+    }
+    #typebox {
+        width: 80%;
+        margin-left: 10%;
+        margin-right: 10%;
+        text-align: center;
+    }
+
+This goes with an update to `index.html`, which now looks like:
+
+    <div id="origin">
+        <div id="viewport"></div>
+        <div id="textarea">
+            <div id="textbox"></div>
+            <form onsubmit="submit_message(); return false;">
+                <input type="text" id="typebox" autofocus="true"
+                    placeholder="type your message here">
+            </form>
+        </div>
+    </div>
+
+### set your name ###
+
+This should work pretty well, but there's one last thing to do:
+allow clients to set their name.
+
+There are various ways this could be done,
+but for now because it's easy let's add a special command
+that can be typed into the chat box.
+
+    /nick <myname>
+
+We can do it pretty simply by setting a default nickname in `open()`:
+
+        # assign a nickname
+        self.nickname = str(self.request.remote_ip)
+
+and analyzing the message in `on_message()`:
+
+        if "message" in parsed_message:
+            if parsed_message["message"].startswith("/nick "):
+                self.nickname = parsed_message["message"].split()[1]
+                return
+            response = {
+                "client" : self.nickname,
+                "color" : self.color,
+                "message" : parsed_message["message"]
+            }
+
+Here the new response message now includes the nickname,
+which will default to the client IP address, as before.
+
+### test it all again ###
+
+We should now have a fully-functional realtime chat app,
+accepting an arbitrary number of connections,
+and even allowing a slash-command to change our nickname.
+Nice.
+
+
