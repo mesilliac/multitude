@@ -23,10 +23,8 @@ server.onmessage = function(message) {
         document.getElementById('textbox').innerHTML += "<br>" + text;
     } else if (m.action == "drawline") {
         var viewport = document.getElementById('viewport');
-        var from = [m.from[0] * 1000,
-                    m.from[1] * 1000];
-        var to = [m.to[0] * 1000,
-                  m.to[1] * 1000];
+        var from = [m.from[0] * 1000, m.from[1] * 1000];
+        var to = [m.to[0] * 1000, m.to[1] * 1000];
         var ctx = viewport.getContext('2d');
         ctx.strokeStyle = m.color;
         ctx.lineWidth = 2;

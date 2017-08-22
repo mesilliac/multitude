@@ -54,7 +54,7 @@ The client will be written in html,
 and served from the "client" directory.
 So that the client can also define separate resource files,
 such as art assets, css and javascript files,
-we server everything from the "client" directory as-is.
+we serve everything from the "client" directory as-is.
 To do this we can use a `tornado.web.StaticFileHandler`.
 
     def make_app():
@@ -440,12 +440,12 @@ Add the following to our `client/index.js`:
     // code to run when our websocket connects
     server.onopen = function() {
         server.send("Hello, server!");
-    };
+    }
 
     // code to run when we receive a message from the server
     server.onmessage = function(message) {
         alert(message.data);
-    };
+    }
 
 Now when the client opens the websocket connection,
 it will send the server a message "Hello, server!".
@@ -473,8 +473,6 @@ and code can be executed in the `on_close` method.
 Let's print out some connection info when a socket is closed.
 
     def on_close(self):
-        """Called when a client connection is closed for any reason."""
-        
         # print some info about the closed connection
         print("WebSocket closed",
               "by user at {}".format(self.request.remote_ip))
@@ -501,7 +499,7 @@ In `client/index.js`:
     server.onmessage = function(message) {
         alert(message.data);
         server.close(1000, "message received");
-    };
+    }
 
 ### verify that it works ###
 
@@ -516,6 +514,7 @@ the server should print some info, such as
     WebSocket closed by user at 127.0.0.1
     close code: 1000
     close reason: u'message received'
+
 
 Step 5: JSON messages
 =====================
@@ -574,7 +573,7 @@ so that it makes a popup window with the text of "popup" from the message.
         if (m.popup) {
             alert(m.popup);
         }
-    };
+    }
 
 Now when we refresh, we should see what we originally had,
 a popup window with
@@ -590,7 +589,7 @@ so we can also log them to the javascript console using `console.log()`.
         if (m.popup) {
             alert(m.popup);
         }
-    };
+    }
 
 This console can be opened in Firefox with CTRL-SHIFT-K,
 and in Chrome with CTRL-SHIFT-J.
@@ -600,7 +599,7 @@ While we're at it, let's also update our javascript to send using JSON.
     server.onopen = function() {
         message = JSON.stringify({"message": "Hello, server!"});
         server.send(message);
-    };
+    }
 
 Now our server should show the new JSON-format messages
 
@@ -875,7 +874,7 @@ then you can work on both sides at once.
 But even then it's nice to be able to cleanly distribute the work later,
 when your idea turns out to be wildly successful and workload increases.
 
-Here we can assume that while we were adding the random color functionality,
+Here we can assume that while we were adding the random colour functionality,
 our design team updated our `index.css`,
 rewriting `#textbox` and `#typebox`, and adding a new `#textarea` tag:
 
@@ -1024,10 +1023,8 @@ is a block to handle drawing lines when recieving a "drawline" message:
 
         } else if (m.action == "drawline") {
             var viewport = document.getElementById('viewport');
-            var from = [m.from[0] * 1000,
-                        m.from[1] * 1000];
-            var to = [m.to[0] * 1000,
-                      m.to[1] * 1000];
+            var from = [m.from[0] * 1000, m.from[1] * 1000];
+            var to = [m.to[0] * 1000, m.to[1] * 1000];
             var ctx = viewport.getContext('2d');
             ctx.strokeStyle = m.color;
             ctx.lineWidth = 2;
