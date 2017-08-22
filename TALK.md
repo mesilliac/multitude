@@ -966,14 +966,14 @@ and tell all clients to draw.
 Here we can just add an "elif" statement
 after our `if "message" in parsed_message:` block
 
-        elif m.get("action", None) == "drag":
+        elif parsed_message.get("action", None) == "drag":
             # send a "drawline" action to everyone
             response = {
                 "client" : self.nickname,
                 "color" : self.color,
                 "action" : "drawline",
-                "from" : m["from"],
-                "to" : m["to"]
+                "from" : parsed_message["from"],
+                "to" : parsed_message["to"]
             }
             m = json.dumps(response)
             for connection in client_connections:
