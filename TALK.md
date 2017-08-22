@@ -950,3 +950,129 @@ and even allowing a slash-command to change our nickname.
 Nice.
 
 
+Step 8: Other message types
+===========================
+
+Now that we have a chat app,
+let's move on to our second core function:
+being able to draw.
+
+On our server side there's not much to do.
+We need to detect when somebody clicks and drags on the viewport,
+which is purely client code.
+
+We need to parse the drag message,
+and tell all clients to draw.
+Here we can just add an "elif" statement
+after our `if "message" in parsed_message:` block
+
+        elif m.get("action", None) == "drag":
+            # send a "drawline" action to everyone
+            response = {
+                "client" : self.nickname,
+                "color" : self.color,
+                "action" : "drawline",
+                "from" : m["from"],
+                "to" : m["to"]
+            }
+            m = json.dumps(response)
+            for connection in client_connections:
+                connection.write_message(m)
+            print("messaged {} clients".format(len(client_connections)))
+
+At this point we could do some code cleanup and refactoring,
+split out the message handler,
+create a function for sending response objects to all clients,
+and so on.
+
+As it is, however, this should be enough to fully support shared drawing.
+
+### client ###
+
+Sure enough, after we implement the additions in our server
+our design team comes up with a modified `index.html`
+
+    <div id="origin">
+        <div id="clickbox"></div>
+        <canvas id="viewport" width=1000 height=1000></canvas>
+        <div id="textarea">
+            <div id="textbox"></div>
+            <form onsubmit="submit_message(); return false;">
+                <input type="text" id="typebox" autofocus="true"
+                    placeholder="type your message here">
+            </form>
+        </div>
+    </div>
+
+an added tag to `index.css`
+
+    #clickbox {
+        z-index: 3;
+        width: 100vmin;
+        height: 100vmin;
+        position: absolute;
+        top: -50vmin;
+        left: -50vmin;
+        background-color: none;
+    }
+
+and a whole bunch of added javascript.
+I won't paste the updated javascript here,
+but it should be able to be found in the "8" subfolder of this repository.
+The key part that relates to what we've already seen
+is a block to handle drawing lines when recieving a "drawline" message:
+
+        } else if (m.action == "drawline") {
+            var viewport = document.getElementById('viewport');
+            var from = [m.from[0] * 1000,
+                        m.from[1] * 1000];
+            var to = [m.to[0] * 1000,
+                      m.to[1] * 1000];
+            var ctx = viewport.getContext('2d');
+            ctx.strokeStyle = m.color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(from[0], from[1]);
+            ctx.lineTo(to[0], to[1]);
+            ctx.stroke();
+        }
+
+The rest of the added code is for handling mouse clicks,
+and determining the correct coordinates to send for "from" and "to".
+
+If you've already customized your javascript,
+you can cut and paste the extra code from `8/client/index.js`.
+
+### try it all out ###
+
+At this point getting things to work will probably take some testing.
+But when all goes well,
+we should have a fancy shared multi-user webapp,
+allowing many users to connect, chat and draw together in realtime.
+
+
+Step 9: Whatever you imagine
+============================
+
+After this,
+whatever your app does is just a matter of imagination and persistence.
+
+Here our server doesn't do much except for forward messages,
+but it's easy to imagine the server sending messages itself,
+doing processing in the background,
+keeping track of state for users that just connected,
+and many other things.
+
+We haven't relly even scratched the surface of what Tornado can do,
+and i highly recommend checking out the user guide at
+http://www.tornadoweb.org/en/stable/guide.html .
+In particular we haven't talked about Tornado's great concurrency features,
+which fit in really nicely with some of the latest improvements in Python.
+It is definitely much more than a web server and message bus.
+
+I hope you enjoyed this talk as much as i enjoyed writing it,
+and i hope to see your awesome apps online in the future :).
+
+
+--- Thomas Iorns
+
